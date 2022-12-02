@@ -16,5 +16,5 @@ fun day2() = File("input/day02.txt").readLines()
     .map { Pair(it[0] - 'A', it[2] - 'X') }
     .let { Pair(
         it.sumOf { (a, b) -> b + 1 + (b - a + 1).mod(3) * 3 },
-        it.sumOf { (a, b) -> 1 + (a - 1).mod(3) + b * 3 }
+        it.sumOf { (a, b) -> 1 + (b + a - 1).mod(3) + b * 3 }
     )}
