@@ -5,7 +5,8 @@ import java.io.File
 fun main(args: Array<String>) {
     // println(day1())
     // println(day2())
-    println(day3())
+    // println(day3())
+    println(day4())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -34,3 +35,12 @@ fun day3() = File("input/day03.txt").readLines().let { list ->
             .sumOf { prio(it.first()) }
     )
 }
+
+fun day4() = File("input/day04.txt").readLines()
+    .map { it.split(Regex("[-,]")).map(String::toInt) }
+    .let { lines ->
+        Pair(
+            lines.count { (a1, a2, b1, b2) -> a1 >= b1 && a2 <= b2 || b1 >= a1 && b2 <= a2 },
+            lines.count { (a1, a2, b1, b2) -> a1 in b1..b2 || a2 in b1..b2 || b1 in a1..a2 || b2 in a1..a2 },
+        )
+    }
