@@ -24,14 +24,14 @@ fun day2() = File("input/day02.txt").readLines()
     }
 
 fun day3() = File("input/day03.txt").readLines().let { list ->
-    fun prio(c: Char) = if (c >= 'a') (c - 'a' + 1) else (c - 'A' + 27)
+    fun prio(c: Char) = (('a'..'z') + ('A'..'Z')).indexOf(c) + 1
     Pair(
         list
             .map { it.take(it.length / 2).toSet() intersect it.drop(it.length / 2).toSet() }
             .sumOf { prio(it.first()) },
         list
-            .windowed(3, 3)
-            .map { (a, b, c) -> a.toSet() intersect b.toSet() intersect c.toSet() }
+            .map { it.toSet() }.chunked(3)
+            .map { (a, b, c) -> a intersect b intersect c }
             .sumOf { prio(it.first()) }
     )
 }
@@ -40,7 +40,7 @@ fun day4() = File("input/day04.txt").readLines()
     .map { it.split(Regex("[-,]")).map(String::toInt) }
     .let { lines ->
         Pair(
-            lines.count { (a1, a2, b1, b2) -> a1 >= b1 && a2 <= b2 || b1 >= a1 && b2 <= a2 },
+            lines.count { (a1, a2, b1, b2) -> a1 in b1..b2 && a2 in b1..b2 || b1 in a1..a2 && b2 in a1..a2 },
             lines.count { (a1, a2, b1, b2) -> a1 in b1..b2 || a2 in b1..b2 || b1 in a1..a2 || b2 in a1..a2 },
         )
     }
