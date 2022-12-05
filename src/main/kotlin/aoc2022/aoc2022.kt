@@ -47,25 +47,24 @@ fun day4() = File("input/day04.txt").readLines()
         )
     }
 
-fun day5() = File("input/day05.txt").readLines().let { lines ->
+fun day5() = File("input/day05.txt").readText().let { text ->
     val boxes1 = Array(9) { ArrayDeque<String>() }
     val boxes2 = Array(9) { ArrayDeque<String>() }
-    lines.forEach { line ->
+
+    text.split("\n").forEach { line ->
         Regex("[A-Z]").findAll(line).forEach { match ->
             boxes1[match.range.first / 4].add(match.value)
             boxes2[match.range.first / 4].add(match.value)
         }
     }
 
-    lines
-        .flatMap { Regex("move (\\d+) from (\\d+) to (\\d+)").findAll(it) }
-        .map { m -> m.destructured.toList().map { it.toInt() - 1 }}
-        .forEach { (n, from, to) ->
-            (0..n).forEach { i ->
-                boxes1[to].addFirst(boxes1[from].removeAt(0))
-                boxes2[to].addFirst(boxes2[from].removeAt(n - i))
-            }
+    Regex("move (\\d+) from (\\d+) to (\\d+)").findAll(text).forEach { match ->
+        val (n, from, to) = match.destructured.toList().map { it.toInt() - 1 }
+        (0..n).forEach { i ->
+            boxes1[to].addFirst(boxes1[from].removeAt(0))
+            boxes2[to].addFirst(boxes2[from].removeAt(n - i))
         }
+    }
 
     Pair(
         boxes1.joinToString("") { it[0] },
