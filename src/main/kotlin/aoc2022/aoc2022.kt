@@ -1,12 +1,14 @@
 package aoc2022
 
 import java.io.File
+import kotlin.collections.ArrayDeque
 
 fun main(args: Array<String>) {
     // println(day1())
     // println(day2())
     // println(day3())
-    println(day4())
+    // println(day4())
+    println(day5())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -44,3 +46,33 @@ fun day4() = File("input/day04.txt").readLines()
             lines.count { (a1, a2, b1, b2) -> a1 in b1..b2 || a2 in b1..b2 || b1 in a1..a2 || b2 in a1..a2 },
         )
     }
+
+fun day5() = File("input/day05.txt").readLines().let { lines ->
+    val boxes1 = Array(9) { ArrayDeque<Char>() }
+    val boxes2 = Array(9) { ArrayDeque<Char>() }
+    lines
+        .takeWhile { it != "" }
+        .reversed()
+        .forEach { line ->
+            line
+                .withIndex()
+                .filter { (_, c) -> c.isLetter() }
+                .forEach { (x, c) ->
+                    boxes1[x / 4].add(c)
+                    boxes2[x / 4].add(c)
+                }
+        }
+
+    lines.dropWhile { it != "" }.drop(1).forEach { line ->
+        val (n, source, target) = Regex("\\d+").findAll(line).map { it.value.toInt() - 1 }.toList()
+        (0..n).forEach { i ->
+            boxes1[target].add(boxes1[source].removeLast())
+            boxes2[target].add(boxes2[source].removeAt(boxes2[source].size - n + i - 1))
+        }
+    }
+
+    Pair(
+        boxes1.map { it.last() }.joinToString(""),
+        boxes2.map { it.last() }.joinToString("")
+    )
+}
