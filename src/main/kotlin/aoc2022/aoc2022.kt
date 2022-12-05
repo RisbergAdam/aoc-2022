@@ -48,8 +48,8 @@ fun day4() = File("input/day04.txt").readLines()
     }
 
 fun day5() = File("input/day05.txt").readLines().let { lines ->
-    val boxes1 = Array(9) { ArrayDeque<Char>() }
-    val boxes2 = Array(9) { ArrayDeque<Char>() }
+    val boxes1 = Array(9) { ArrayList<Char>() }
+    val boxes2 = Array(9) { ArrayList<Char>() }
     lines
         .takeWhile { it != "" }
         .reversed()
@@ -64,10 +64,10 @@ fun day5() = File("input/day05.txt").readLines().let { lines ->
         }
 
     lines.dropWhile { it != "" }.drop(1).forEach { line ->
-        val (n, source, target) = Regex("\\d+").findAll(line).map { it.value.toInt() - 1 }.toList()
+        val (n, from, to) = Regex("\\d+").findAll(line).map { it.value.toInt() - 1 }.toList()
         (0..n).forEach { i ->
-            boxes1[target].add(boxes1[source].removeLast())
-            boxes2[target].add(boxes2[source].removeAt(boxes2[source].size - n + i - 1))
+            boxes1[to].add(boxes1[from].removeAt(boxes1[from].size - 1))
+            boxes2[to].add(boxes2[from].removeAt(boxes2[from].size - 1 - n + i))
         }
     }
 
