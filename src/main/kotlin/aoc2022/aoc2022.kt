@@ -8,7 +8,8 @@ fun main(args: Array<String>) {
     // println(day2())
     // println(day3())
     // println(day4())
-    println(day5())
+    // println(day5())
+    println(day6())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -69,5 +70,12 @@ fun day5() = File("input/day05.txt").readText().let { text ->
     Pair(
         boxes1.joinToString("") { it[0] },
         boxes2.joinToString("") { it[0] }
+    )
+}
+
+fun day6() = File("input/day06.txt").readText().let { line ->
+    Pair(
+        line.windowed(4).indexOfFirst { it.toSet().size == 4 } + 4,
+        line.windowed(14).indexOfFirst { it.toSet().size == 14 } + 14,
     )
 }
