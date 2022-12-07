@@ -81,36 +81,27 @@ fun day6() = File("input/day06.txt").readText().let { line ->
     )
 }
 
-fun day7() = File("input/day07.txt")
-    .readLines()
-    .map { line -> line.split(" ") }
-    .let { lines -> // enrich each line with its pwd
-        lines.scan(listOf<String>()) { pwd, line ->
-            val (t, cmd, arg) = line + "ARG"
-            when {
-                t == "$" && cmd == "cd" && arg == ".." -> pwd.dropLast(1)
-                t == "$" && cmd == "cd" -> pwd + arg
-                else -> pwd
-            }
-        }.zip(lines)
-    }
-    .filter { (_, line) -> line[0] != "$" }
-    .groupBy({ (pwd, _) -> pwd }, { (_, line) ->
+fun day7() = File("input/day07.txt").readLines().let { lines ->
+    val dirs = HashMap<List<String>, Int>()
+    var pwd = listOf<String>()
+    lines.map { it.split(" ") }.forEach { line ->
+        val (t, cmd, arg) = line + "PAD"
         when {
-            line[0] == "dir" -> 0
-            else -> line[0].toInt()
+            t == "$" && cmd == "cd" && arg == ".." -> pwd = pwd.dropLast(1)
+            t == "$" && cmd == "cd" -> pwd = pwd + arg
+            t == "$" && cmd == "ls" -> Unit
+            t == "dir" -> Unit
+            else -> {
+                pwd
+                    .mapIndexed { index, _ -> pwd.take(index + 1) }
+                    .forEach { dirs[it] = (dirs[it] ?: 0) + t.toInt() }
+            }
         }
-    })
-    .let { directories -> // find the size of each directory in n^2 :')
-        directories.map { (pwd1) ->
-            directories
-                .filter { (pwd2) -> pwd1 == pwd2.take(pwd1.size) }
-                .toList().sumOf { (_, size2) -> size2.sum() }
-        }
-    }.let { dirSizes ->
-        val free = 70000000 - dirSizes.maxOf { it }
-        Pair(
-            dirSizes.filter { it <= 100000 }.sum(),
-            dirSizes.filter { free + it > 30000000 }.minOf { it }
-        )
     }
+    val free = 70000000 - dirs.maxOf { it.value }
+    dirs.map { (_, size) -> size }.let { sizes ->
+        Pair(
+            sizes.filter { it <= 100000 }.sum(),
+            sizes.filter { free + it > 30000000 }.minOf { it })
+    }
+}
