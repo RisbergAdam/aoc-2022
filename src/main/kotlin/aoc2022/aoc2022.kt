@@ -82,26 +82,26 @@ fun day6() = File("input/day06.txt").readText().let { line ->
 }
 
 fun day7() = File("input/day07.txt").readLines().let { lines ->
-    val dirs = HashMap<List<String>, Int>()
-    var pwd = listOf<String>()
-    lines.map { it.split(" ") }.forEach { line ->
-        val (t, cmd, arg) = line + "PAD"
-        when {
-            t == "$" && cmd == "cd" && arg == ".." -> pwd = pwd.dropLast(1)
-            t == "$" && cmd == "cd" -> pwd = pwd + arg
-            t == "$" && cmd == "ls" -> Unit
-            t == "dir" -> Unit
-            else -> {
-                pwd
-                    .mapIndexed { index, _ -> pwd.take(index + 1) }
-                    .forEach { dirs[it] = (dirs[it] ?: 0) + t.toInt() }
+    val acc0 = Pair(listOf<String>(), mapOf<List<String>, Int>())
+    lines
+        .map { it.split(" ") + "_" }
+        .fold(acc0) { (pwd, dirs), (t, cmd, arg) ->
+            when {
+                t == "$" && cmd == "cd" && arg == ".." -> Pair(pwd.dropLast(1), dirs)
+                t == "$" && cmd == "cd" -> Pair(pwd + arg, dirs)
+                t == "$" && cmd == "ls" -> Pair(pwd, dirs)
+                t == "dir" -> Pair(pwd, dirs)
+                else -> Pair(pwd, pwd
+                    .mapIndexed { ix, _ -> pwd.take(ix + 1) }
+                    .fold(dirs) { acc, path ->
+                        acc + mapOf(path to t.toInt().plus(acc[path] ?: 0))
+                    })
             }
+        }.let { (_, dirs) ->
+            val sizes = dirs.toList().map { (_, size) -> size }
+            val free = 70000000 - sizes.maxOf { it }
+            Pair(
+                sizes.filter { it <= 100000 }.sum(),
+                sizes.filter { free + it > 30000000 }.minOf { it })
         }
-    }
-    val free = 70000000 - dirs.maxOf { it.value }
-    dirs.map { (_, size) -> size }.let { sizes ->
-        Pair(
-            sizes.filter { it <= 100000 }.sum(),
-            sizes.filter { free + it > 30000000 }.minOf { it })
-    }
 }
