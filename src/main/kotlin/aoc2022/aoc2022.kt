@@ -1,9 +1,7 @@
 package aoc2022
 
 import java.io.File
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import kotlin.collections.*
 
 fun main(args: Array<String>) {
     // println(day1())
