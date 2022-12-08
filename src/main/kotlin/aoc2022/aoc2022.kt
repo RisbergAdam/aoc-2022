@@ -10,7 +10,8 @@ fun main(args: Array<String>) {
     // println(day4())
     // println(day5())
     // println(day6())
-    println(day7())
+    // println(day7())
+    println(day8())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -104,4 +105,47 @@ fun day7() = File("input/day07.txt").readLines().let { lines ->
                 sizes.filter { it <= 100000 }.sum(),
                 sizes.filter { free + it > 30000000 }.minOf { it })
         }
+}
+
+fun day8() = File("input/day08.txt").readLines().let { lines ->
+    val grid = lines.map { line -> line.map { it - '0' } }
+    val dirs = listOf(Pair(-1, 0), Pair(1, 0), Pair(0, -1), Pair(0, 1))
+
+    var visibleCount = 0
+    var maxScore  = 0
+
+    grid.indices
+        .flatMap { y -> grid.indices.map { x -> Pair(x, y) } }
+        .forEach { (x, y) ->
+            var visible = false
+            outer@for ((dx, dy) in dirs) {
+                for (s in 1..grid.size) {
+                    val tx = x + dx * s
+                    val ty = y + dy * s
+                    if (tx !in grid.indices || ty !in grid.indices) visible = true
+                    else if (grid[ty][tx] >= grid[y][x]) break
+                }
+            }
+
+            var score  = 1
+            for ((dx, dy) in dirs) {
+                for (s in 1..grid.size) {
+                    val tx = x + dx * s
+                    val ty = y + dy * s
+                    if (tx !in grid.indices || ty !in grid.indices) {
+                        score *= s - 1
+                        break
+                    }
+                    if (grid[ty][tx] >= grid[y][x]) {
+                        score *= s
+                        break
+                    }
+                }
+            }
+
+            if (visible) visibleCount++
+            if (score > maxScore) maxScore = score
+        }
+
+    Pair(visibleCount, maxScore)
 }
