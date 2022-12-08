@@ -111,41 +111,26 @@ fun day8() = File("input/day08.txt").readLines().let { lines ->
     val grid = lines.map { line -> line.map { it - '0' } }
     val dirs = listOf(Pair(-1, 0), Pair(1, 0), Pair(0, -1), Pair(0, 1))
 
-    var visibleCount = 0
-    var maxScore  = 0
-
     grid.indices
         .flatMap { y -> grid.indices.map { x -> Pair(x, y) } }
-        .forEach { (x, y) ->
-            var visible = false
-            outer@for ((dx, dy) in dirs) {
-                for (s in 1..grid.size) {
-                    val tx = x + dx * s
-                    val ty = y + dy * s
-                    if (tx !in grid.indices || ty !in grid.indices) visible = true
-                    else if (grid[ty][tx] >= grid[y][x]) break
-                }
-            }
-
-            var score  = 1
-            for ((dx, dy) in dirs) {
-                for (s in 1..grid.size) {
-                    val tx = x + dx * s
-                    val ty = y + dy * s
-                    if (tx !in grid.indices || ty !in grid.indices) {
-                        score *= s - 1
-                        break
-                    }
-                    if (grid[ty][tx] >= grid[y][x]) {
-                        score *= s
-                        break
-                    }
-                }
-            }
-
-            if (visible) visibleCount++
-            if (score > maxScore) maxScore = score
+        .map { (x, y) ->
+            Pair(
+                dirs.any { (dx, dy) ->
+                    (1..grid.size)
+                        .map { s -> Pair(x + dx * s, y + dy * s) }
+                        .filter { (tx, ty) -> tx in grid.indices && ty in grid.indices }
+                        .all { (tx, ty) -> grid[ty][tx] < grid[y][x] }
+                },
+                dirs.fold(1) { acc, (dx, dy) ->
+                    acc * (1..grid.size)
+                        .map { s -> Pair(x + dx * s, y + dy * s) }
+                        .filter { (tx, ty) -> tx + dx in grid.indices && ty + dy in grid.indices }
+                        .takeWhile { (tx, ty) -> grid[ty][tx] < grid[y][x] }
+                        .count().plus(1)
+                })
+        }.let { trees ->
+            Pair(
+                trees.count { (visible, _) -> visible },
+                trees.maxOf { (_, score) -> score })
         }
-
-    Pair(visibleCount, maxScore)
 }
