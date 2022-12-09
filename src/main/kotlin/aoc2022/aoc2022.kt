@@ -140,7 +140,7 @@ fun day8() = File("input/day08.txt").readLines().let { lines ->
 fun day9() = File("input/day09.txt").readLines().let { lines ->
     data class Point(var x: Int = 0, var y: Int = 0)
 
-    val rope = Array(10) { Point() }
+    val rope = List(10) { Point() }
     val visited1 = HashSet<Point>()
     val visited2 = HashSet<Point>()
 
@@ -148,7 +148,7 @@ fun day9() = File("input/day09.txt").readLines().let { lines ->
         .map { it.split(" ") }
         .map { (dir, s) -> Pair(dir, s.toInt()) }
         .forEach { (dir, s) ->
-            (1..s).forEach { _ ->
+            repeat(s) {
                 when (dir) {
                     "U" -> rope[0].y++
                     "R" -> rope[0].x++
@@ -156,7 +156,7 @@ fun day9() = File("input/day09.txt").readLines().let { lines ->
                     "L" -> rope[0].x--
                 }
 
-                rope.toList().windowed(2).forEach { (prev, curr) ->
+                rope.windowed(2).forEach { (prev, curr) ->
                     val dx = prev.x - curr.x
                     val dy = prev.y - curr.y
 
