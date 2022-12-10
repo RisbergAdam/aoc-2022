@@ -191,9 +191,9 @@ fun day10() = File("input/day10.txt").readLines().let { lines ->
         .forEachIndexed { clock, (op, arg) ->
             val row = clock / 40
             val col = clock.mod(40)
-            if (op == "addx") x += arg.toInt();
             if (col in (x - 1)..(x + 1)) screen[row][col] = "#"
-            if (clock.plus(21).mod(40) == 0) signal += x * clock.plus(1)
+            if (op == "addx") x += arg.toInt()
+            if (clock.plus(20).mod(40) == 0) signal += x * clock
         }
 
     screen.forEach { println(it.joinToString("")) }
