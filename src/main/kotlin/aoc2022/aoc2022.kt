@@ -181,19 +181,16 @@ fun day10() = File("input/day10.txt").readLines().let { lines ->
     val screen = Array(6) { Array(40) { "." } }
 
     lines.map { it.split(" ") + "_" }
-        .flatMap { (op, arg) ->
-            when (op) {
-                "noop" -> listOf(Pair("noop", "_"))
-                "addx" -> listOf(Pair("noop", "_"), Pair("addx", arg))
-                else -> listOf()
-            }
+        .flatMap {
+            if (it[0] == "addx") listOf(listOf("noop", "_"), it)
+            else listOf(it)
         }
         .forEachIndexed { clock, (op, arg) ->
             val row = clock / 40
             val col = clock.mod(40)
             if (col in (x - 1)..(x + 1)) screen[row][col] = "#"
             if (op == "addx") x += arg.toInt()
-            if (clock.plus(20).mod(40) == 0) signal += x * clock
+            if (col == 20) signal += x * clock
         }
 
     screen.forEach { println(it.joinToString("")) }
