@@ -175,12 +175,12 @@ fun day9() = File("input/day09.txt").readLines().let { lines ->
     Pair(visited1.size, visited2.size)
 }
 
-fun day10() = File("input/day10.txt").readLines().let { line ->
+fun day10() = File("input/day10.txt").readLines().let { lines ->
     var x = 1
     var signal = 0
     val screen = Array(6) { Array(40) { "." } }
 
-    line.map { it.split(" ") + "_" }
+    lines.map { it.split(" ") + "_" }
         .flatMap { (op, arg) ->
             when (op) {
                 "noop" -> listOf(Pair("noop", "_"))
@@ -191,9 +191,9 @@ fun day10() = File("input/day10.txt").readLines().let { line ->
         .forEachIndexed { clock, (op, arg) ->
             val row = clock / 40
             val col = clock.mod(40)
+            if (op == "addx") x += arg.toInt();
             if (col in (x - 1)..(x + 1)) screen[row][col] = "#"
             if (clock.plus(21).mod(40) == 0) signal += x * clock.plus(1)
-            if (op == "addx") x += arg.toInt();
         }
 
     screen.forEach { println(it.joinToString("")) }
