@@ -14,7 +14,8 @@ fun main(args: Array<String>) {
     // println(day7())
     // println(day8())
     // println(day9())
-    println(day10())
+    // println(day10())
+    println(day11())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -195,4 +196,54 @@ fun day10() = File("input/day10.txt").readLines().let { lines ->
 
     screen.forEach { println(it.joinToString("")) }
     signal
+}
+
+fun day11() = File("input/day11.txt").readText().let { text ->
+    data class Monkey(
+        val items: MutableList<Long>,
+        val op: (Long) -> Long,
+        val test: Long,
+        val m1: Int,
+        val m2: Int,
+        var inspections: Long = 0
+    )
+
+    val monkeys = text
+        .split("\r\n\r\n")
+        .map { it.split("\n") }
+        .map { input ->
+            val args = input[2].drop(19).trim().split(" ")
+            Monkey(
+                items = input[1].drop(18).split(", ").map { it.trim().toLong() }.toMutableList(),
+                op = { v ->
+                    val arg1 = if (args[0] == "old") v else args[0].toLong()
+                    val arg2 = if (args[2] == "old") v else args[2].toLong()
+                    when (args[1]) {
+                        "*" -> arg1 * arg2
+                        "+" -> arg1 + arg2
+                        else -> 0L
+                    }
+                },
+                test = input[3].takeLastWhile { it != ' ' }.trim().toLong(),
+                m1 = input[4].takeLastWhile { it != ' ' }.trim().toInt(),
+                m2 = input[5].takeLastWhile { it != ' ' }.trim().toInt(),
+            )
+        }
+
+    val testSum = monkeys.map { it.test }.reduce { a, b -> a * b }
+
+    repeat(10000) {
+        monkeys.forEach { m ->
+            val items = m.items.toList()
+            m.items.clear()
+            items.forEach { item ->
+                m.inspections++
+                val inspected = m.op(item).mod(testSum) // / 3
+                val receiver = if (inspected.mod(m.test) == 0L) m.m1 else m.m2
+                monkeys[receiver].items.add(inspected)
+            }
+        }
+    }
+
+    monkeys.map { it.inspections }.sorted().takeLast(2).let { (a, b) -> a * b }
 }
