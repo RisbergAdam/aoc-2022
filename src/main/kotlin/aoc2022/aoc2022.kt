@@ -305,8 +305,7 @@ fun day12() = File("input/day12.txt").readLines().let { lines ->
 
 fun day13() = File("input/day13.txt").readLines().let { lines ->
     fun parse(line: String): ArrayList<Any> {
-        val stack = ArrayList<ArrayList<Any>>()
-        stack.add(ArrayList())
+        val stack = arrayListOf(ArrayList<Any>())
         line.split(",")
             .flatMap { text -> text.split("[").flatMap { listOf("[", it) }.drop(1) }
             .flatMap { text -> text.split("]").flatMap { listOf("]", it) }.drop(1) }
@@ -318,7 +317,6 @@ fun day13() = File("input/day13.txt").readLines().let { lines ->
                     else -> stack.last() += t.toInt()
                 }
             }
-
         return stack.last()
     }
 
@@ -353,9 +351,8 @@ fun day13() = File("input/day13.txt").readLines().let { lines ->
     val p2 = lines
         .filter { it != "" }
         .plus(listOf("[[2]]", "[[6]]"))
-        .map { line -> parse(line) }
-        .sortedWith { a, b -> if (compare(a, b) != true) 1 else -1 }
-        .map { it.first().toString() }.let { list ->
+        .sortedWith { a, b -> if (compare(parse(a), parse(b)) != true) 1 else -1 }
+        .map { it }.let { list ->
             val key1 = list.indexOf("[[2]]") + 1
             val key2 = list.indexOf("[[6]]") + 1
             key1 * key2
