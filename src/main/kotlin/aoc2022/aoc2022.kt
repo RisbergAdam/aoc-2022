@@ -1,6 +1,7 @@
 package aoc2022
 
 import java.io.File
+import java.util.*
 import kotlin.collections.*
 import kotlin.math.*
 
@@ -15,7 +16,9 @@ fun main(args: Array<String>) {
     // println(day8())
     // println(day9())
     // println(day10())
-    println(day11())
+    // println(day11())
+    // println(day12())
+    println(day13())
 }
 
 fun day1() = File("input/day01.txt").readText()
@@ -216,11 +219,11 @@ fun day11() = File("input/day11.txt").readText().let { text ->
             Monkey(
                 items = input[1].drop(18).split(", ").map { it.trim().toLong() }.toMutableList(),
                 op = { v ->
-                    val arg1 = if (args[0] == "old") v else args[0].toLong()
                     val arg2 = if (args[2] == "old") v else args[2].toLong()
+                    val f = Int::and
                     when (args[1]) {
-                        "*" -> arg1 * arg2
-                        "+" -> arg1 + arg2
+                        "*" -> v * arg2
+                        "+" -> v + arg2
                         else -> 0L
                     }
                 },
@@ -246,4 +249,117 @@ fun day11() = File("input/day11.txt").readText().let { text ->
     }
 
     monkeys.map { it.inspections }.sorted().takeLast(2).let { (a, b) -> a * b }
+}
+
+fun day12() = File("input/day12.txt").readLines().let { lines ->
+    data class Point(val x: Int, val y: Int)
+    data class Cell(val char: String, val height: Int, val position: Point)
+
+    val grid = lines.mapIndexed { y, line ->
+        line
+            .map { it.toString() }
+            .map { Pair(it, it.replace('S', 'a').replace('E', 'z')) }
+            .mapIndexed { x, (char, height) ->
+                Cell(char, height[0] - 'a', Point(x, y))
+            }
+    }
+
+    val positions = grid.flatMap { line -> line.map { it.position } }.toSet()
+
+    val visited = HashSet<Point>()
+    val queue = PriorityQueue<Pair<Int, Point>> { (p1), (p2) -> p1 - p2 }
+    val start = grid.flatten().find { (char) -> char == "S" }!!.position
+    val end = grid.flatten().find { (char) -> char == "E" }!!.position
+
+    queue.add(Pair(0, end))
+
+    var part2 = 0
+
+    while (queue.isNotEmpty()) {
+        val (step, head) = queue.poll()
+        if (head == start) return@let Pair(step, part2)
+        val height = grid[head.y][head.x].height
+
+        if (head.y == 0 || head.y == grid.lastIndex ||
+            head.x == 0 || head.x == grid[0].lastIndex
+        ) {
+            if (height == 0 && part2 == 0) part2 = step
+        }
+
+        queue.addAll(
+            listOf(
+                Point(head.x + 1, head.y + 0),
+                Point(head.x + 0, head.y + 1),
+                Point(head.x - 1, head.y + 0),
+                Point(head.x + 0, head.y - 1)
+            )
+                .filter { it !in visited }
+                .filter { it in positions }
+                .filter { height - grid[it.y][it.x].height <= 1 }
+                .also { visited += it }
+                .map { Pair(step + 1, it) })
+    }
+
+    return@let null
+}
+
+fun day13() = File("input/day13.txt").readLines().let { lines ->
+    fun parse(line: String): ArrayList<Any> {
+        val stack = ArrayList<ArrayList<Any>>()
+        stack.add(ArrayList())
+        line.split(",")
+            .flatMap { text -> text.split("[").flatMap { listOf("[", it) }.drop(1) }
+            .flatMap { text -> text.split("]").flatMap { listOf("]", it) }.drop(1) }
+            .filter { it != "" }
+            .forEach { t ->
+                when (t) {
+                    "[" -> stack += ArrayList<Any>()
+                    "]" -> stack.removeLast().let { stack.last().add(it) }
+                    else -> stack.last() += t.toInt()
+                }
+            }
+
+        return stack.last()
+    }
+
+    fun compare(left: Any, right: Any): Boolean? {
+        if (left !is Int && right is Int) return compare(left, arrayListOf(right))
+        if (left is Int && right !is Int) return compare(arrayListOf(left), right)
+
+        if (left is Int && right is Int) {
+            return when {
+                left < right -> true
+                left > right -> false
+                else -> null
+            }
+        } else if (left is ArrayList<*> && right is ArrayList<*>) {
+            val compared = left.zip(right).firstNotNullOfOrNull { (a, b) -> compare(a, b) }
+            return compared ?: when {
+                left.size < right.size -> true
+                left.size > right.size -> false
+                else -> null
+            }
+        }
+
+        return true
+    }
+
+    val p1 = lines
+        .chunked(3)
+        .withIndex()
+        .filter { (_, group) -> compare(parse(group[0]), parse(group[1]))!! }
+        .sumOf { (ix) -> ix + 1 }
+
+    val p2 = lines
+        .filter { it != "" }
+        .plus(listOf("[[2]]", "[[6]]"))
+        .map { line -> parse(line) }
+        .sortedWith { a, b -> if (compare(a, b) != true) 1 else -1 }
+        .map { it.first().toString() }.let { list ->
+            val key1 = list.indexOf("[[2]]") + 1
+            val key2 = list.indexOf("[[6]]") + 1
+            key1 * key2
+        }
+
+    Pair(p1, p2)
 }
